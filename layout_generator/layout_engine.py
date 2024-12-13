@@ -27,6 +27,6 @@ class GraphLayouts:
         :param layout_name: A string denoting the name of the layout algorithm.
         :param nodes: A list of dictionaries which has nodes.
         :param edges: A list of dictionaries which has edges.
-        :return: Dictionary which gives output format of nodes and edges with their respective positions.
+        :return: Dictionary which gives output format of nodes and edges with their respective positions
         """
         pass
