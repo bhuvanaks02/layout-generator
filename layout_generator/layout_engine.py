@@ -53,7 +53,13 @@ class GraphLayouts:
         :param layout_name: A string denoting the name of the layout algorithm.
         :return: List of strings which gives full module path and the converted class name.
         """
-        pass
+        try:
+            layout_path = f"{self.constants.module_path}.{layout_name}"
+            class_name = self.utils.snakecase_to_camelcase(layout_name)
+            return [layout_path, class_name]
+        except Exception as e:
+            self.log.error(e.args)
+            raise
 
     def fetch_dynamic_module(self, layout_name: str) -> type(BaseLayout):
         """
