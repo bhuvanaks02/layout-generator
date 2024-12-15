@@ -6,6 +6,8 @@ from layout_generator.base import BaseLayout
 from layout_generator.constants import LayoutConstants
 from layout_generator.constants.schemas import Edges, Nodes, OutputFormat
 
+from layout_generator.utils import LayoutUtils
+
 
 class GraphLayouts:
     """
@@ -15,6 +17,8 @@ class GraphLayouts:
 
     def __init__(self):
         self.log = logging.getLogger("Initializing Graph Layouts")
+        self.utils = LayoutUtils()
+        self.constants = LayoutConstants()
 
     def fetch_layout(
         self,
@@ -29,4 +33,46 @@ class GraphLayouts:
         :param edges: A list of dictionaries which has edges.
         :return: Dictionary which gives output format of nodes and edges with their respective positions
         """
+        try:
+            if not layout_name:
+                layout_name = self.constants.layout_name
+            if not nodes:
+                raise ValueError("Nodes cannot be None or empty.")
+            self.log.info(f"fetch_layout: Fetching layout for {layout_name}")
+            layout_object = self.fetch_dynamic_module(layout_name)
+            output_nodes = layout_object.get_layout(nodes=nodes, edges=edges)
+            return output_nodes
+
+        except Exception as e:
+            self.log.error(e.args)
+            raise
+
+    def fetch_layout_details(self, layout_name: str) -> List[str]:
+        """
+        The function fetches full module path and class name of the particular module or layout being called.
+        :param layout_name: A string denoting the name of the layout algorithm.
+        :return: List of strings which gives full module path and the converted class name.
+        """
         pass
+
+    def fetch_dynamic_module(self, layout_name: str) -> type(BaseLayout):
+        """
+        The function takes the layout name and dynamically imports the particular class in the layouts folder and
+         returns an object of that class.
+        :param layout_name: A string denoting the name of the layout algorithm.
+        :return: An object of the specific layout algorithm's class.
+        """
+        try:
+            layout_path, class_name = self.fetch_layout_details(layout_name)
+            module_name = importlib.import_module(layout_path)
+
+            node_positions = getattr(module_name, class_name, None)
+
+            if not issubclass(node_positions, BaseLayout):
+                raise TypeError("Class is not a subclass of BaseLayout")
+
+            return node_positions()
+
+        except Exception as e:
+            self.log.error(e.args)
+            raise
