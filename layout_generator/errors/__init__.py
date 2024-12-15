@@ -18,3 +18,19 @@ class ModuleImportError(LayoutsBaseException):
     """
 
     message = "Unable to import module"
+
+
+class DataFetchError(LayoutsBaseException):
+    """
+    Error while fetching data
+    """
+
+    message = "Error while calculating the positions."
+
+
+class InvalidClassError(LayoutsBaseException):
+    """
+    Error while fetching class
+    """
+
+    message = "The class name is an invalid class."

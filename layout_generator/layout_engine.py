@@ -5,7 +5,7 @@ from typing import List
 from layout_generator.base import BaseLayout
 from layout_generator.constants import LayoutConstants
 from layout_generator.constants.schemas import Edges, Nodes, OutputFormat
-
+from layout_generator.errors import InvalidClassError, InvalidLayoutName, ModuleImportError
 from layout_generator.utils import LayoutUtils
 
 
@@ -55,6 +55,8 @@ class GraphLayouts:
         """
         try:
             layout_path = f"{self.constants.module_path}.{layout_name}"
+            if layout_name not in LayoutConstants.available_layouts:
+                raise InvalidLayoutName(InvalidLayoutName.message)
             class_name = self.utils.snakecase_to_camelcase(layout_name)
             return [layout_path, class_name]
         except Exception as e:
@@ -71,8 +73,12 @@ class GraphLayouts:
         try:
             layout_path, class_name = self.fetch_layout_details(layout_name)
             module_name = importlib.import_module(layout_path)
-
+            if not module_name:
+                raise ModuleImportError(ModuleImportError.message)
             node_positions = getattr(module_name, class_name, None)
+
+            if not node_positions:
+                raise InvalidClassError(f"{class_name} is an invalid class")
 
             if not issubclass(node_positions, BaseLayout):
                 raise TypeError("Class is not a subclass of BaseLayout")
